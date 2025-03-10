@@ -130,10 +130,17 @@
                         number = Math.floor(Math.random() * totalNumbers) + 1;
                     } while (calledNumbers.includes(number));
 
-                    calledNumbers.push(number);
-                    document.getElementById('number').innerText = number;
+                    calledNumbers.push(number);    
+
+                    let lastFiveNumbers = calledNumbers.slice(-5).reverse().join(' - ');
+                    let formattedNumbers = lastFiveNumbers.split(' - ').map((num, index) => {
+                        return index === 0 ? `<span style="color: orange; background-color: black; border-radius: 50%; padding: 5px 10px;">${num}</span>` : `<span style="color: grey;">${num}</span>`;
+                    }).join(', ');
+                    document.getElementById('number').innerHTML = formattedNumbers;
+                   
                     updateTable(number);
 
+                    /*
                     let audio = new Audio(`Sound/${number}.mp3`);
                     const hiddenButton = document.createElement('button');
                     hiddenButton.style.display = 'none';
@@ -144,7 +151,8 @@
                         audio.play();
                     });
 
-                    hiddenButton.click();                   
+                    hiddenButton.click();   
+                    */                
                 }, interval);
             }
 
@@ -206,7 +214,7 @@
 
 
     </div>
-    <div id="number">Click "Start" to start</div>
+    <div id="number">Click "Start" to start</div>    
     <table id="bingoTable" border="1" style="margin: 0 auto; margin-top: 20px;">
         <style>
             td {
