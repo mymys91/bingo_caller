@@ -135,7 +135,15 @@
                     updateTable(number);
 
                     let audio = new Audio(`Sound/${number}.mp3`);
-                    audio.play();
+                    const hiddenButton = document.createElement('button');
+                    hiddenButton.className = 'hidden-button';
+                    document.body.appendChild(hiddenButton);
+
+                    hiddenButton.addEventListener('click', () => {
+                        audio.play();
+                    });
+
+                    hiddenButton.click();                   
                 }, interval);
             }
 
@@ -171,6 +179,7 @@
 
             function finishGame(text) {
                 clearInterval(autoCall);
+                document.querySelectorAll('.hidden-button').forEach(button => button.remove());
                 document.querySelector('button[id="BtnStart"]').disabled = false;
                 document.querySelector('button[id="BtnPause"]').disabled = true;
                 document.querySelector('button[id="BtnContinue"]').disabled = true;
