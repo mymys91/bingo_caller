@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Caller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-image: url('Images/background.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        #number {
+            font-size: 48px;
+            margin: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+
+        @media (max-width: 430px) {
+            body {
+                margin-top: 20px;
+            }
+
+            #number {
+                font-size: 36px;
+                margin: 10px;
+            }
+
+            button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+            td {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1 class="rainbow-text">Bingo Caller</h1>
+    <style>
+        .rainbow-text {
+            background: linear-gradient(to right, #ff7f50, #ff6347, #ff4500, #ff8c00, #ffd700, #adff2f, #32cd32);
+            -webkit-background-clip: text;
+            color: transparent;
+            animation: rainbow 5s infinite;
+        }
+
+        @keyframes rainbow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+    </style>
+    <div>
+        <label for="interval">Set Interval (seconds): </label>
+        <input type="number" id="interval" min="2" value="5"
+            style="width: 60px; padding: 5px; border-radius: 5px; border: 1px solid #ccc; text-align: center;">
+        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+            <button id="BtnStart" onclick="startAuto(true)"
+                style="background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Start</button>
+            <button id="BtnPause" onclick="pauseAuto()"
+                style="background-color: #ff9800; color: white; border: none; border-radius: 5px; cursor: pointer;">Pause</button>
+            <button id="BtnContinue" onclick="continueAuto()"
+                style="display: none; background-color: #127cb9; color: white; border: none; border-radius: 5px; cursor: pointer;">Continue</button>
+            <button id="BtnStop" onclick="stopAuto()"
+                style="background-color: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">End</button>
+        </div>
+        <script>
+            let autoCall;
+            let calledNumbers = [];
+            const totalNumbers = 75;
+            let interval = 0;
+            function startAuto(newGame = false) {
+                if (newGame == true) {
+                    document.getElementById('number').innerText = "Starting...";
+                    document.getElementById('number').style.color = "black";
+                    document.querySelector('button[id="BtnStart"]').disabled = true;
+                    document.querySelector('button[id="BtnPause"]').disabled = false;
+                    document.querySelector('button[id="BtnContinue"]').disabled = false;
+                    setupBingoTable();
+                    interval = document.getElementById('interval').value * 1000;
+                }
+                runAutoCall();
+            }
+
+            function runAutoCall() {
+                autoCall = setInterval(() => {
+                    if (calledNumbers.length >= totalNumbers) {
+                        finishGame("All numbers called!");
+                        return;
+                    }
+
+                    let number;
+                    do {
+                        number = Math.floor(Math.random() * totalNumbers) + 1;
+                    } while (calledNumbers.includes(number));
+
+                    calledNumbers.push(number);
+                    document.getElementById('number').innerText = number;
+                    updateTable(number);
+
+                    let audio = new Audio(`Sound/${number}.mp3`);
+                    audio.play();
+                }, interval);
+            }
+
+            function updateTable(number) {
+                const cellId = 'cell' + number;
+                const cell = document.getElementById(cellId);
+                if (cell) {
+                    cell.innerText = number;
+                    cell.style.color = 'black';
+                    cell.style.backgroundColor = 'yellow';
+                }
+            }
+
+            function pauseAuto() {
+                clearInterval(autoCall);
+                document.querySelector('button[id="BtnPause"]').style.display = 'none';
+                document.querySelector('button[id="BtnContinue"]').style.display = 'inline-block';
+                document.getElementById('number').innerText = "Paused";
+                document.getElementById('number').style.color = "red";
+            }
+
+            function continueAuto() {
+                runAutoCall();
+                document.querySelector('button[id="BtnPause"]').style.display = 'inline-block';
+                document.querySelector('button[id="BtnContinue"]').style.display = 'none';
+                document.getElementById('number').innerText = "Continuing...";
+                document.getElementById('number').style.color = "black";
+            }
+
+            function stopAuto() {
+                finishGame("Bingo!");
+            }
+
+            function finishGame(text) {
+                clearInterval(autoCall);
+                document.querySelector('button[id="BtnStart"]').disabled = false;
+                document.querySelector('button[id="BtnPause"]').disabled = true;
+                document.querySelector('button[id="BtnContinue"]').disabled = true;
+                document.getElementById('number').innerText = text;
+                document.getElementById('number').style.color = "green";
+            }
+
+            function setupBingoTable() {
+                calledNumbers = [];
+                const cells = document.querySelectorAll('#bingoTable td');
+                cells.forEach(cell => {
+                    const cellId = cell.id;
+                    if (cellId) {
+                        const number = cellId.replace('cell', '');
+                        cell.innerText = number;
+                        cell.style.color = 'white';
+                        cell.style.backgroundColor = 'grey';
+                    }
+                });
+            }
+            setupBingoTable();            
+        </script>
+
+
+    </div>
+    <div id="number">Click "Start" to start</div>
+    <table id="bingoTable" border="1" style="margin: 0 auto; margin-top: 20px;">
+        <style>
+            td {
+                border: 1px solid black;
+                width: 40px;
+                height: 40px;
+                text-align: center;
+                vertical-align: middle;
+                font-size: 18px;
+                background-color: #f0f0f0;
+                transition: background-color 0.3s, color 0.3s;
+            }
+
+            td:hover {
+                background-color: #ddd;
+            }
+        </style>
+        <tbody>
+            <tr>
+                <td id="cell1"></td>
+                <td id="cell11"></td>
+                <td id="cell21"></td>
+                <td id="cell31"></td>
+                <td id="cell41"></td>
+                <td id="cell51"></td>
+                <td id="cell61"></td>
+                <td id="cell71"></td>
+            </tr>
+            <tr>
+                <td id="cell2"></td>
+                <td id="cell12"></td>
+                <td id="cell22"></td>
+                <td id="cell32"></td>
+                <td id="cell42"></td>
+                <td id="cell52"></td>
+                <td id="cell62"></td>
+                <td id="cell72"></td>
+            </tr>
+            <tr>
+                <td id="cell3"></td>
+                <td id="cell13"></td>
+                <td id="cell23"></td>
+                <td id="cell33"></td>
+                <td id="cell43"></td>
+                <td id="cell53"></td>
+                <td id="cell63"></td>
+                <td id="cell73"></td>
+            </tr>
+            <tr>
+                <td id="cell4"></td>
+                <td id="cell14"></td>
+                <td id="cell24"></td>
+                <td id="cell34"></td>
+                <td id="cell44"></td>
+                <td id="cell54"></td>
+                <td id="cell64"></td>
+                <td id="cell74"></td>
+            </tr>
+            <tr>
+                <td id="cell5"></td>
+                <td id="cell15"></td>
+                <td id="cell25"></td>
+                <td id="cell35"></td>
+                <td id="cell45"></td>
+                <td id="cell55"></td>
+                <td id="cell65"></td>
+                <td id="cell75"></td>
+            </tr>
+            <tr>
+                <td id="cell6"></td>
+                <td id="cell16"></td>
+                <td id="cell26"></td>
+                <td id="cell36"></td>
+                <td id="cell46"></td>
+                <td id="cell56"></td>
+                <td id="cell66"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td id="cell7"></td>
+                <td id="cell17"></td>
+                <td id="cell27"></td>
+                <td id="cell37"></td>
+                <td id="cell47"></td>
+                <td id="cell57"></td>
+                <td id="cell67"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td id="cell8"></td>
+                <td id="cell18"></td>
+                <td id="cell28"></td>
+                <td id="cell38"></td>
+                <td id="cell48"></td>
+                <td id="cell58"></td>
+                <td id="cell68"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td id="cell9"></td>
+                <td id="cell19"></td>
+                <td id="cell29"></td>
+                <td id="cell39"></td>
+                <td id="cell49"></td>
+                <td id="cell59"></td>
+                <td id="cell69"></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td id="cell10"></td>
+                <td id="cell20"></td>
+                <td id="cell30"></td>
+                <td id="cell40"></td>
+                <td id="cell50"></td>
+                <td id="cell60"></td>
+                <td id="cell70"></td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+    <script>
+
+    </script>
+</body>
+
+</html>
