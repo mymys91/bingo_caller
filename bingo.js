@@ -3,11 +3,16 @@ document.addEventListener("DOMContentLoaded", function (event) {
     document.querySelector('button[id="BtnStop"]').style.display = 'none';
     document.querySelector('button[id="BtnPause"]').style.display = 'none';
     document.querySelector('button[id="BtnContinue"]').style.display = 'none';
+    setupBingoTable();
+
+    document.getElementById('game').addEventListener('change', function () {
+        setupBingoTable();
+    });
 });
 
 let autoCall;
 let calledNumbers = [];
-const totalNumbers = 75;
+let totalNumbers = 0;
 let interval = 0;
 
 function UpdateButtonsState(state) {
@@ -98,7 +103,7 @@ function runAutoCall() {
 }
 
 function updateTable(number) {
-    const cellId = 'cell' + number;
+    const cellId = 'cell' + number + '_' + totalNumbers;
     const cell = document.getElementById(cellId);
     if (cell) {
         cell.innerText = number;
@@ -131,18 +136,38 @@ function finishGame(text) {
     document.getElementById('number').style.color = "green";
 }
 
+
+
 function setupBingoTable() {
     calledNumbers = [];
-    const cells = document.querySelectorAll('#bingoTable td');
-    cells.forEach(cell => {
+    document.getElementById('bingoTable75').style.display = 'none';
+    document.getElementById('lotoTable90').style.display = 'none';
+    const gameOption = document.getElementById('game').value;   
+    if (gameOption === 'bingo75') {
+        totalNumbers = 75;
+        document.getElementById('bingoTable75').style.display = 'table';
+        const cells = document.querySelectorAll('#bingoTable75 td');
+        cells.forEach(cell => {
         const cellId = cell.id;
-        if (cellId) {
-            const number = cellId.replace('cell', '');
-            cell.innerText = number;
-            cell.style.color = 'white';
-            cell.style.backgroundColor = 'grey';
-        }
-    });
-}
-
-setupBingoTable();            
+            if (cellId) {
+                const number = cellId.replace('cell', '').replace('_75', '');
+                cell.innerText = number;
+                cell.style.color = 'white';
+                cell.style.backgroundColor = 'grey';
+            }
+        });
+    } else if (gameOption === 'loto90') {
+        totalNumbers = 90;
+        document.getElementById('lotoTable90').style.display = 'table';
+        const cells = document.querySelectorAll('#lotoTable90 td');
+        cells.forEach(cell => {
+            const cellId = cell.id;
+            if (cellId) {
+                const number = cellId.replace('cell', '').replace('_90', '');
+                cell.innerText = number;
+                cell.style.color = 'white';
+                cell.style.backgroundColor = 'grey';
+            }
+        });
+    }
+}    
