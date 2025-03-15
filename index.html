@@ -135,7 +135,7 @@
                     let lastFiveNumbers = calledNumbers.slice(-5).reverse().join(' - ');
                     let formattedNumbers = lastFiveNumbers.split(' - ').map((num, index) => {
                         return index === 0 ? `<span style="color: orange; background-color: black; border-radius: 50%; padding: 5px 10px;">${num}</span>` : `<span style="color: grey;">${num}</span>`;
-                    }).join(', ');
+                    }).join(' - ');
                     document.getElementById('number').innerHTML = formattedNumbers;
                    
                     updateTable(number);
@@ -169,17 +169,13 @@
             function pauseAuto() {
                 clearInterval(autoCall);
                 document.querySelector('button[id="BtnPause"]').style.display = 'none';
-                document.querySelector('button[id="BtnContinue"]').style.display = 'inline-block';
-                document.getElementById('number').innerText = "Paused";
-                document.getElementById('number').style.color = "red";
+                document.querySelector('button[id="BtnContinue"]').style.display = 'inline-block';               
             }
 
             function continueAuto() {
                 runAutoCall();
                 document.querySelector('button[id="BtnPause"]').style.display = 'inline-block';
-                document.querySelector('button[id="BtnContinue"]').style.display = 'none';
-                document.getElementById('number').innerText = "Continuing...";
-                document.getElementById('number').style.color = "black";
+                document.querySelector('button[id="BtnContinue"]').style.display = 'none';                
             }
 
             function stopAuto() {
