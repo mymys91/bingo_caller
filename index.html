@@ -22,7 +22,7 @@
         }
 
         button {
-            padding: 10px 20px; 
+            padding: 10px 20px;
             font-size: 16px;
         }
 
@@ -75,11 +75,11 @@
         }
     </style>
     <div>
-        <label for="interval">Set Interval (seconds): </label>
-        <input type="number" id="interval" min="2" value="5"
-            style="width: 60px; padding: 5px; border-radius: 5px; border: 1px solid #ccc; text-align: center;">
+        <label for="interval">Set Speed (seconds): </label>
+        <input type="range" id="interval" min="2" max="10" value="4" oninput="this.nextElementSibling.value = this.value">
+        <output style="margin-left: 10px;">4</output>
         <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-            <button id="BtnStart" onclick="startAuto(true)"
+            <button id="BtnStart" onclick="startAuto()"
                 style="background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Start</button>
             <button id="BtnPause" onclick="pauseAuto()"
                 style="background-color: #ff9800; color: white; border: none; border-radius: 5px; cursor: pointer;">Pause</button>
@@ -89,36 +89,56 @@
                 style="background-color: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">End</button>
         </div>
         <script>
+            document.addEventListener("DOMContentLoaded", function (event) {
+                document.querySelector('button[id="BtnStop"]').style.display = 'none';
+                document.querySelector('button[id="BtnPause"]').style.display = 'none';
+                document.querySelector('button[id="BtnContinue"]').style.display = 'none';
+            });
+
             let autoCall;
             let calledNumbers = [];
             const totalNumbers = 75;
             let interval = 0;
 
-            let audioContextInitialized = false;
-
-            function initializeAudioContext() {
-                if (!audioContextInitialized) {
-                    let silentAudio = new Audio();
-                    silentAudio.play().catch(() => { });
-                    audioContextInitialized = true;
+            function UpdateButtonsState(state) {
+                document.querySelector('button[id="BtnStart"]').style.display = 'none';
+                document.querySelector('button[id="BtnPause"]').style.display = 'none';
+                document.querySelector('button[id="BtnContinue"]').style.display = 'none';
+                document.querySelector('button[id="BtnStop"]').style.display = 'none';
+                switch (state) {
+                    case 'start':
+                        document.querySelector('button[id="BtnStop"]').style.display = 'inline-block';
+                        document.querySelector('button[id="BtnPause"]').style.display = 'inline-block';
+                        break;
+                    case 'pause':
+                        document.querySelector('button[id="BtnStop"]').style.display = 'inline-block';
+                        document.querySelector('button[id="BtnContinue"]').style.display = 'inline-block';
+                        break;
+                    case 'continue':
+                        document.querySelector('button[id="BtnPause"]').style.display = 'inline-block';
+                        document.querySelector('button[id="BtnStop"]').style.display = 'inline-block';
+                        break;
+                    case 'stop':
+                        document.querySelector('button[id="BtnStart"]').style.display = 'inline-block';
+                        break;
                 }
             }
 
-            function startAuto(newGame = false) {
-                initializeAudioContext();
-                if (newGame == true) {
-                    document.getElementById('number').innerText = "Starting...";
-                    document.getElementById('number').style.color = "black";
-                    document.querySelector('button[id="BtnStart"]').disabled = true;
-                    document.querySelector('button[id="BtnPause"]').disabled = false;
-                    document.querySelector('button[id="BtnContinue"]').disabled = false;
-                    setupBingoTable();
-                    interval = document.getElementById('interval').value * 1000;
-                }
+
+            function startAuto() {
+                document.getElementById('number').innerText = "Starting...";
+                document.getElementById('number').style.color = "black";
+                UpdateButtonsState('start');
+                setupBingoTable();
+
                 runAutoCall();
             }
 
             function runAutoCall() {
+                interval = document.getElementById('interval').value * 1000;
+                document.getElementById('interval').disabled = true;
+                document.getElementById('interval').style.opacity = '0.5';
+                document.getElementById('interval').style.cursor = 'not-allowed';
                 autoCall = setInterval(() => {
                     if (calledNumbers.length >= totalNumbers) {
                         finishGame("All numbers called!");
@@ -130,29 +150,15 @@
                         number = Math.floor(Math.random() * totalNumbers) + 1;
                     } while (calledNumbers.includes(number));
 
-                    calledNumbers.push(number);    
+                    calledNumbers.push(number);
 
                     let lastFiveNumbers = calledNumbers.slice(-5).reverse().join(' - ');
                     let formattedNumbers = lastFiveNumbers.split(' - ').map((num, index) => {
                         return index === 0 ? `<span style="color: orange; background-color: black; border-radius: 50%; padding: 5px 10px;">${num}</span>` : `<span style="color: grey;">${num}</span>`;
                     }).join(' - ');
                     document.getElementById('number').innerHTML = formattedNumbers;
-                   
+
                     updateTable(number);
-
-                    /*
-                    let audio = new Audio(`Sound/${number}.mp3`);
-                    const hiddenButton = document.createElement('button');
-                    hiddenButton.style.display = 'none';
-                    hiddenButton.className = 'hidden-button';
-                    document.body.appendChild(hiddenButton);
-
-                    hiddenButton.addEventListener('click', () => {
-                        audio.play();
-                    });
-
-                    hiddenButton.click();   
-                    */                
                 }, interval);
             }
 
@@ -168,26 +174,33 @@
 
             function pauseAuto() {
                 clearInterval(autoCall);
-                document.querySelector('button[id="BtnPause"]').style.display = 'none';
-                document.querySelector('button[id="BtnContinue"]').style.display = 'inline-block';               
+                document.getElementById('interval').disabled = false;
+                document.getElementById('interval').style.opacity = '1';
+                document.getElementById('interval').style.cursor = 'pointer';
+                UpdateButtonsState('pause');
             }
 
             function continueAuto() {
+                UpdateButtonsState('continue');
                 runAutoCall();
-                document.querySelector('button[id="BtnPause"]').style.display = 'inline-block';
-                document.querySelector('button[id="BtnContinue"]').style.display = 'none';                
+
             }
 
             function stopAuto() {
+                UpdateButtonsState('stop');
                 finishGame("Bingo!");
             }
 
             function finishGame(text) {
                 clearInterval(autoCall);
-                document.querySelectorAll('.hidden-button').forEach(button => button.remove());
-                document.querySelector('button[id="BtnStart"]').disabled = false;
-                document.querySelector('button[id="BtnPause"]').disabled = true;
-                document.querySelector('button[id="BtnContinue"]').disabled = true;
+                document.getElementById('interval').disabled = false;
+                document.getElementById('interval').style.opacity = '1';
+                document.getElementById('interval').style.cursor = 'pointer';
+                
+                document.querySelector('button[id="BtnStart"]').style.display = 'inline-block';
+                document.querySelector('button[id="BtnStop"]').style.display = 'none';
+                document.querySelector('button[id="BtnPause"]').style.display = 'none';
+                document.querySelector('button[id="BtnContinue"]').style.display = 'none';
                 document.getElementById('number').innerText = text;
                 document.getElementById('number').style.color = "green";
             }
@@ -205,12 +218,13 @@
                     }
                 });
             }
+
             setupBingoTable();            
         </script>
 
 
     </div>
-    <div id="number">Click "Start" to start</div>    
+    <div id="number">Click "Start" to start</div>
     <table id="bingoTable" border="1" style="margin: 0 auto; margin-top: 20px;">
         <style>
             td {
