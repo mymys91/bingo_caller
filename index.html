@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="bingo.js"></script>
     <title>Bingo Caller</title>
     <style>
         body {
@@ -53,6 +54,11 @@
 <body>
     <h1 class="rainbow-text">Bingo Caller</h1>
     <style>
+        html,
+        body {
+            overscroll-behavior: none;
+        }
+
         .rainbow-text {
             background: linear-gradient(to right, #ff7f50, #ff6347, #ff4500, #ff8c00, #ffd700, #adff2f, #32cd32);
             -webkit-background-clip: text;
@@ -75,9 +81,18 @@
         }
     </style>
     <div>
+        <label for="game">Choose Game: </label>
+        <select id="game">
+            <option value="bingo75">Bingo 75</option>
+            <option value="loto90">Loto 90</option>
+        </select>
+        <span style="margin: 0 10px;"></span>
         <label for="interval">Set Speed (seconds): </label>
-        <input type="range" id="interval" min="2" max="10" value="4" oninput="this.nextElementSibling.value = this.value">
+        <input type="range" id="interval" min="2" max="10" value="4"
+            oninput="this.nextElementSibling.value = this.value">
         <output style="margin-left: 10px;">4</output>
+
+
         <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
             <button id="BtnStart" onclick="startAuto()"
                 style="background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Start</button>
@@ -88,141 +103,6 @@
             <button id="BtnStop" onclick="stopAuto()"
                 style="background-color: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">End</button>
         </div>
-        <script>
-            document.addEventListener("DOMContentLoaded", function (event) {
-                document.querySelector('button[id="BtnStop"]').style.display = 'none';
-                document.querySelector('button[id="BtnPause"]').style.display = 'none';
-                document.querySelector('button[id="BtnContinue"]').style.display = 'none';
-            });
-
-            let autoCall;
-            let calledNumbers = [];
-            const totalNumbers = 75;
-            let interval = 0;
-
-            function UpdateButtonsState(state) {
-                document.querySelector('button[id="BtnStart"]').style.display = 'none';
-                document.querySelector('button[id="BtnPause"]').style.display = 'none';
-                document.querySelector('button[id="BtnContinue"]').style.display = 'none';
-                document.querySelector('button[id="BtnStop"]').style.display = 'none';
-                switch (state) {
-                    case 'start':
-                        document.querySelector('button[id="BtnStop"]').style.display = 'inline-block';
-                        document.querySelector('button[id="BtnPause"]').style.display = 'inline-block';
-                        break;
-                    case 'pause':
-                        document.querySelector('button[id="BtnStop"]').style.display = 'inline-block';
-                        document.querySelector('button[id="BtnContinue"]').style.display = 'inline-block';
-                        break;
-                    case 'continue':
-                        document.querySelector('button[id="BtnPause"]').style.display = 'inline-block';
-                        document.querySelector('button[id="BtnStop"]').style.display = 'inline-block';
-                        break;
-                    case 'stop':
-                        document.querySelector('button[id="BtnStart"]').style.display = 'inline-block';
-                        break;
-                }
-            }
-
-
-            function startAuto() {
-                document.getElementById('number').innerText = "Starting...";
-                document.getElementById('number').style.color = "black";
-                UpdateButtonsState('start');
-                setupBingoTable();
-
-                runAutoCall();
-            }
-
-            function runAutoCall() {
-                interval = document.getElementById('interval').value * 1000;
-                document.getElementById('interval').disabled = true;
-                document.getElementById('interval').style.opacity = '0.5';
-                document.getElementById('interval').style.cursor = 'not-allowed';
-                autoCall = setInterval(() => {
-                    if (calledNumbers.length >= totalNumbers) {
-                        finishGame("All numbers called!");
-                        return;
-                    }
-
-                    let number;
-                    do {
-                        number = Math.floor(Math.random() * totalNumbers) + 1;
-                    } while (calledNumbers.includes(number));
-
-                    calledNumbers.push(number);
-
-                    let lastFiveNumbers = calledNumbers.slice(-5).reverse().join(' - ');
-                    let formattedNumbers = lastFiveNumbers.split(' - ').map((num, index) => {
-                        return index === 0 ? `<span style="color: orange; background-color: black; border-radius: 50%; padding: 5px 10px;">${num}</span>` : `<span style="color: grey;">${num}</span>`;
-                    }).join(' - ');
-                    document.getElementById('number').innerHTML = formattedNumbers;
-
-                    updateTable(number);
-                }, interval);
-            }
-
-            function updateTable(number) {
-                const cellId = 'cell' + number;
-                const cell = document.getElementById(cellId);
-                if (cell) {
-                    cell.innerText = number;
-                    cell.style.color = 'black';
-                    cell.style.backgroundColor = 'yellow';
-                }
-            }
-
-            function pauseAuto() {
-                clearInterval(autoCall);
-                document.getElementById('interval').disabled = false;
-                document.getElementById('interval').style.opacity = '1';
-                document.getElementById('interval').style.cursor = 'pointer';
-                UpdateButtonsState('pause');
-            }
-
-            function continueAuto() {
-                UpdateButtonsState('continue');
-                runAutoCall();
-
-            }
-
-            function stopAuto() {
-                UpdateButtonsState('stop');
-                finishGame("Bingo!");
-            }
-
-            function finishGame(text) {
-                clearInterval(autoCall);
-                document.getElementById('interval').disabled = false;
-                document.getElementById('interval').style.opacity = '1';
-                document.getElementById('interval').style.cursor = 'pointer';
-                
-                document.querySelector('button[id="BtnStart"]').style.display = 'inline-block';
-                document.querySelector('button[id="BtnStop"]').style.display = 'none';
-                document.querySelector('button[id="BtnPause"]').style.display = 'none';
-                document.querySelector('button[id="BtnContinue"]').style.display = 'none';
-                document.getElementById('number').innerText = text;
-                document.getElementById('number').style.color = "green";
-            }
-
-            function setupBingoTable() {
-                calledNumbers = [];
-                const cells = document.querySelectorAll('#bingoTable td');
-                cells.forEach(cell => {
-                    const cellId = cell.id;
-                    if (cellId) {
-                        const number = cellId.replace('cell', '');
-                        cell.innerText = number;
-                        cell.style.color = 'white';
-                        cell.style.backgroundColor = 'grey';
-                    }
-                });
-            }
-
-            setupBingoTable();            
-        </script>
-
-
     </div>
     <div id="number">Click "Start" to start</div>
     <table id="bingoTable" border="1" style="margin: 0 auto; margin-top: 20px;">
