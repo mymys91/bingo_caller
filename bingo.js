@@ -94,7 +94,7 @@ function runAutoCall() {
 
         let lastFiveNumbers = calledNumbers.slice(-5).reverse().join(' - ');
         let formattedNumbers = lastFiveNumbers.split(' - ').map((num, index) => {
-            return index === 0 ? `<span style="color: orange; background-color: black; border-radius: 50%; padding: 5px 10px;">${num}</span>` : `<span style="color: grey;">${num}</span>`;
+            return index === 0 ? `<span style="color: #FFE06F; background-color: #6D24CF; border-radius: 50%; padding: 5px 10px;">${num}</span>` : `<span style="color: grey;">${num}</span>`;
         }).join(' - ');
         document.getElementById('number').innerHTML = formattedNumbers;
 
